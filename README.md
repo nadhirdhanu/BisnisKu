@@ -32,8 +32,11 @@ DATABASE_URL=your_database_url_here
 Option A: Use Neon Database (Recommended)
 
 Sign up at neon.tech
+
 Create a new database
+
 Copy the connection string to DATABASE_URL
+
 Option B: Use Local PostgreSQL
 ```
 # Install PostgreSQL locally, then:
