@@ -34,9 +34,9 @@ const Header = () => {
               
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">ND</span>
+                  <span className="text-white text-sm font-medium">BU</span>
                 </div>
-                <span className="text-sm font-medium text-gray-700">Nadhir Dhanu</span>
+                <span className="text-sm font-medium text-gray-700">Budi Santoso</span>
               </div>
               
               {isMobile && (

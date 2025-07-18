@@ -14,8 +14,8 @@ export async function initializeDatabase() {
     const [user] = await db.insert(users).values({
       username: "admin",
       password: "admin123",
-      name: "Nadhir Dhanu",
-      businessName: "Toko Dhanu Makmur",
+      name: "Budi Santoso",
+      businessName: "Toko Budi Makmur",
     }).returning();
 
     // Create sample inventory items

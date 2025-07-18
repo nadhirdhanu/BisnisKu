@@ -55,7 +55,7 @@ Visit: ```http://localhost:5000```
 
 What You'll See:
 - Dashboard with business metrics
-- Sample data (Toko Dhanu Makmur)
+- Sample data (Toko Budi Makmur)
 - Transaction management
 - Inventory tracking
 - AI-powered recommendations
