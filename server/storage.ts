@@ -13,6 +13,7 @@ import {
   type InsertAIRecommendation,
 } from "@shared/schema";
 import { db } from "./db";
+
 import { eq, and, gte, lte, lt, desc } from "drizzle-orm";
 
 export interface IStorage {
@@ -40,165 +41,6 @@ export interface IStorage {
   getAIRecommendations(userId: number): Promise<AIRecommendation[]>;
   createAIRecommendation(recommendation: InsertAIRecommendation): Promise<AIRecommendation>;
   markRecommendationAsRead(id: number): Promise<boolean>;
-}
-
-export class MemStorage implements IStorage {
-  private users: Map<number, User> = new Map();
-  private transactions: Map<number, Transaction> = new Map();
-  private inventoryItems: Map<number, InventoryItem> = new Map();
-  private aiRecommendations: Map<number, AIRecommendation> = new Map();
-  private currentUserId = 1;
-  private currentTransactionId = 1;
-  private currentInventoryId = 1;
-  private currentRecommendationId = 1;
-
-  constructor() {
-    // Create default user
-    this.createUser({
-      username: "budi",
-      password: "password123",
-      name: "Budi Santoso",
-      businessName: "Warung Kopi Budi",
-    });
-  }
-
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
-  }
-
-  async getTransactions(userId: number, limit?: number): Promise<Transaction[]> {
-    const userTransactions = Array.from(this.transactions.values())
-      .filter(t => t.userId === userId)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    
-    return limit ? userTransactions.slice(0, limit) : userTransactions;
-  }
-
-  async getTransactionsByDateRange(userId: number, startDate: Date, endDate: Date): Promise<Transaction[]> {
-    return Array.from(this.transactions.values())
-      .filter(t => {
-        const transactionDate = new Date(t.date);
-        return t.userId === userId && transactionDate >= startDate && transactionDate <= endDate;
-      })
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }
-
-  async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
-    const id = this.currentTransactionId++;
-    const transaction: Transaction = {
-      ...insertTransaction,
-      id,
-      date: new Date(),
-    };
-    this.transactions.set(id, transaction);
-
-    // Update inventory if applicable
-    if (transaction.inventoryItemId && transaction.quantity) {
-      const item = this.inventoryItems.get(transaction.inventoryItemId);
-      if (item) {
-        const newStock = transaction.type === 'sale' 
-          ? item.currentStock - transaction.quantity
-          : item.currentStock + transaction.quantity;
-        
-        this.inventoryItems.set(transaction.inventoryItemId, {
-          ...item,
-          currentStock: Math.max(0, newStock),
-          lastRestocked: transaction.type === 'purchase' ? new Date() : item.lastRestocked,
-        });
-      }
-    }
-
-    return transaction;
-  }
-
-  async updateTransaction(id: number, updateData: Partial<InsertTransaction>): Promise<Transaction | undefined> {
-    const transaction = this.transactions.get(id);
-    if (!transaction) return undefined;
-
-    const updated = { ...transaction, ...updateData };
-    this.transactions.set(id, updated);
-    return updated;
-  }
-
-  async deleteTransaction(id: number): Promise<boolean> {
-    return this.transactions.delete(id);
-  }
-
-  async getInventoryItems(userId: number): Promise<InventoryItem[]> {
-    return Array.from(this.inventoryItems.values())
-      .filter(item => item.userId === userId)
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  async getInventoryItem(id: number): Promise<InventoryItem | undefined> {
-    return this.inventoryItems.get(id);
-  }
-
-  async createInventoryItem(insertItem: InsertInventoryItem): Promise<InventoryItem> {
-    const id = this.currentInventoryId++;
-    const item: InventoryItem = {
-      ...insertItem,
-      id,
-      lastRestocked: null,
-    };
-    this.inventoryItems.set(id, item);
-    return item;
-  }
-
-  async updateInventoryItem(id: number, updateData: Partial<InsertInventoryItem>): Promise<InventoryItem | undefined> {
-    const item = this.inventoryItems.get(id);
-    if (!item) return undefined;
-
-    const updated = { ...item, ...updateData };
-    this.inventoryItems.set(id, updated);
-    return updated;
-  }
-
-  async deleteInventoryItem(id: number): Promise<boolean> {
-    return this.inventoryItems.delete(id);
-  }
-
-  async getLowStockItems(userId: number): Promise<InventoryItem[]> {
-    return Array.from(this.inventoryItems.values())
-      .filter(item => item.userId === userId && item.currentStock <= item.minStockLevel)
-      .sort((a, b) => a.currentStock - b.currentStock);
-  }
-
-  async getAIRecommendations(userId: number): Promise<AIRecommendation[]> {
-    return Array.from(this.aiRecommendations.values())
-      .filter(rec => rec.userId === userId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }
-
-  async createAIRecommendation(insertRecommendation: InsertAIRecommendation): Promise<AIRecommendation> {
-    const id = this.currentRecommendationId++;
-    const recommendation: AIRecommendation = {
-      ...insertRecommendation,
-      id,
-      createdAt: new Date(),
-    };
-    this.aiRecommendations.set(id, recommendation);
-    return recommendation;
-  }
-
-  async markRecommendationAsRead(id: number): Promise<boolean> {
-    const recommendation = this.aiRecommendations.get(id);
-    if (!recommendation) return false;
-
-    this.aiRecommendations.set(id, { ...recommendation, isRead: true });
-    return true;
-  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -351,3 +193,4 @@ export class DatabaseStorage implements IStorage {
 }
 
 export const storage = new DatabaseStorage();
+//export const storage = new MemStorage();

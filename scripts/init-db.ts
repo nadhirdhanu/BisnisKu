@@ -1,20 +1,17 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import { db, pool } from "../server/db";
 import { users, transactions, inventoryItems, aiRecommendations } from "../shared/schema";
-
-neonConfig.webSocketConstructor = ws;
 
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL must be set");
 }
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const db = drizzle({ client: pool });
-
 async function main() {
   try {
     console.log("Initializing database...");
+
+     // Test database connection
+     await pool.query('SELECT NOW()');
+     console.log("Database connection successful");
     
     // Check if user already exists
     const existingUser = await db.select().from(users).limit(1);
@@ -23,15 +20,16 @@ async function main() {
       return;
     }
 
-    // Create default user
-    const [user] = await db.insert(users).values({
-      username: "admin",
-      password: "admin123",
-      name: "Budi Santoso",
-      businessName: "Toko Budi Makmur",
-    }).returning();
+    // Create default user using raw SQL
+    const userResult = await pool.query(`
+      INSERT INTO users (username, password, name, business_name) 
+      VALUES ($1, $2, $3, $4) 
+      RETURNING id, name, business_name
+    `, ["admin", "admin123", "Nadhir Dhanu", "Toko Dhanu Makmur"]);
+    
+    const user = userResult.rows[0];
+    console.log(`Created user: ${user.name} (${user.business_name})`);
 
-    console.log("Created user:", user.name);
 
     // Create sample inventory items
     const inventoryData = [
