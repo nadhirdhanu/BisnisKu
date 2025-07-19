@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { Pool, neonConfig } from 'pg';
+=======
+import { Pool, neonConfig } from '@neondatabase/serverless';
+>>>>>>> parent of 7f67aa5 (update package)
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "@shared/schema";
