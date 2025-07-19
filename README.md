@@ -29,17 +29,12 @@ OPENAI_API_KEY=your_openai_api_key_here
 DATABASE_URL=your_database_url_here
 ```
 4. Database Options
-Option A: Use Neon Database (Recommended)
-
-Sign up at neon.tech
-Create a new database
-Copy the connection string to DATABASE_URL
-Option B: Use Local PostgreSQL
+Option A: Use Local PostgreSQL
 ```
 # Install PostgreSQL locally, then:
 DATABASE_URL=postgresql://username:password@localhost:5432/bisnisKu
 ```
-Option C: Use In-Memory Storage (No database needed)
+Option B: Use In-Memory Storage (No database needed)
 
 Comment out the database import in ```server/storage.ts```
 Change ```export const storage = new DatabaseStorage(); to export const storage = new MemStorage();```
