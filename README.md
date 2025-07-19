@@ -75,7 +75,6 @@ npm run db:push - Update database schema
 - **Runtime**: Node.js with Express.js framework
 - **Language**: TypeScript with ES modules
 - **Database**: PostgreSQL with Drizzle ORM
-- **Database Provider**: Neon Database (serverless PostgreSQL)
 - **API Pattern**: RESTful API with JSON responses
 - **Session Management**: Express sessions with PostgreSQL store
 - **Data Storage**: DatabaseStorage class with full CRUD operations
