@@ -18,6 +18,3 @@ NODE_VERSION = "22.12.0"
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-
-[context.production.environment]
-  NODE_ENV = "production"
